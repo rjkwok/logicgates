@@ -19,6 +19,9 @@ public:
         , logic_operation(logic_operation)
     {
         input = new Gate*[input_count];    
+        for (int i = 0; i < input_count; i++) {
+            *(input + i) = nullptr;
+        }
     }
 
     ~Gate() 
