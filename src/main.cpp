@@ -60,6 +60,9 @@ int main() {
     // Container for holdings labels
     std::vector<sf::Text> labels;
 
+    // Text object to display the truth table
+    sf::Text truth_table_text;
+
     // Container for holding visual representations of wires
     std::vector<sf::RectangleShape> wires;
     std::vector<sf::CircleShape>    joints;
@@ -104,6 +107,15 @@ int main() {
         input_gates.push_back(gates[gates.size() - 1]);
         labels.push_back(makeText("X" + asString(i + 1), font, Vec2(tile_width + 1.5*tile_width, tile_width + 4*i*tile_width + 1.5*tile_width), gate_color, 16));
     }
+
+    std::vector<std::vector<bool> > truth_table;
+    populateTruthTable(total_inputs, truth_table, std::vector<bool>(total_inputs + 2), 0);
+
+    truth_table_text = sf::Text(truthTableAsString(truth_table, total_inputs), font, 20);
+    truth_table_text.setColor(sf::Color(255, 255, 255));
+    sf::FloatRect rect = truth_table_text.getLocalBounds();
+    truth_table_text.setOrigin(0.0f, rect.height);
+    truth_table_text.setPosition(25, window.getSize().y - 25);
 
     // Initialize loop timer
     sf::Clock timer;
@@ -222,6 +234,18 @@ int main() {
                         joints.insert(joints.end(), joint_previews.begin(), joint_previews.end());
                         wiring_gate = nullptr;
                         cursor.setFillColor(sf::Color(0, 255, 0, 155));
+
+                        // Reprocess gates
+
+                        for (int i = 0; i < truth_table.size(); i++) {
+
+                            for (int j = 0; j < total_inputs; j++) {
+                                input_gates[j]->logic_operation = truth_table[i][j] ? ONE : ZERO;
+                            }
+                            truth_table[i][truth_table[i].size() - 1] = (*output_gate)();
+                        }
+
+                        truth_table_text.setString(truthTableAsString(truth_table, total_inputs));
                     }
                 }
             }
@@ -256,6 +280,12 @@ int main() {
             }
         }
         window.draw(cursor);
+
+        window.setView(window_view);
+
+        window.draw(truth_table_text);
+
+        window.setView(scene_view);
 
         window.display();
     }
