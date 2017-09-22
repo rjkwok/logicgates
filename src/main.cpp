@@ -299,5 +299,9 @@ int main() {
         window.display();
     }
 
+    for (auto each: gates) {
+        delete each;
+    }
+
     return 0;
 }
