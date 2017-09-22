@@ -41,6 +41,18 @@ public:
     sf::Sprite  sprite;
 };
 
+bool BUFFER(Gate** input) {
+    return (*input ? (**input)() : 0);
+}
+
+bool ONE(Gate** input) {
+    return true;
+}
+
+bool ZERO(Gate** input) {
+    return false;
+}
+
 bool OR(Gate** input) {
     return (*input ? (**input)() : 0) || (*(input + 1) ? (**(input + 1))() : 0);
 }
