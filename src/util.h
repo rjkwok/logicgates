@@ -45,6 +45,17 @@ sf::CircleShape makeCircle(const sf::Vector2f a, float radius, const sf::Color& 
     return circle;
 }
 
+sf::Text makeText(const std::string& str, sf::Font& font, const sf::Vector2f& centre, const sf::Color& color, const unsigned int size) {
+
+    sf::Text text(str, font, size);
+    text.setColor(color);
+    sf::FloatRect rect = text.getLocalBounds();
+    text.setOrigin(rect.width/2.0f, rect.height/2.0f);
+    text.setPosition(centre);
+
+    return text;
+}
+
 struct Input {
 
     Input() = default;
