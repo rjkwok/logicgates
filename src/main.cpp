@@ -31,15 +31,24 @@ int main() {
     sf::Texture or_texture;
     sf::Texture and_texture;
     sf::Texture not_texture;
-    
+    sf::Texture const_texture;
+    sf::Texture output_texture;
+
     or_texture.loadFromFile("resources/or.png");
     and_texture.loadFromFile("resources/and.png");
     not_texture.loadFromFile("resources/not.png");
+    const_texture.loadFromFile("resources/const.png");
+    output_texture.loadFromFile("resources/output.png");
+
+    // Load fonts
+    sf::Font font;
+    font.loadFromFile("resources/font1.ttf");
 
     // Make some factory functions for creating certain types of logic gates
     auto or_factory = [&or_texture](){ return new Gate(or_texture, 2, new Vec2[2]{ Vec2(0, 15), Vec2(0, 75) }, Vec2(89, 45), OR); };
     auto and_factory = [&and_texture](){ return new Gate(and_texture, 2, new Vec2[2]{ Vec2(0, 15), Vec2(0, 75) }, Vec2(89, 45), AND); };
     auto not_factory = [&not_texture](){ return new Gate(not_texture, 1, new Vec2[1]{ Vec2(0, 45) }, Vec2(89, 45), NOT); };
+    auto const_factory = [&const_texture](){ return new Gate(const_texture, 0, new Vec2[0], Vec2(89, 45), ZERO); };
 
     // Put factory functions in an iterable container for easy UI access
     std::vector<std::function<Gate*()> > factories { or_factory, and_factory, not_factory};
@@ -47,6 +56,9 @@ int main() {
 
     // Declare gate tracking vector
     std::vector<Gate*> gates;
+
+    // Container for holdings labels
+    std::vector<sf::Text> labels;
 
     // Container for holding visual representations of wires
     std::vector<sf::RectangleShape> wires;
@@ -67,6 +79,31 @@ int main() {
 
     // Buffer to allow two gates to be selected for wiring
     Gate* wiring_gate = nullptr;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Setup puzzle
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const sf::Color gate_color = sf::Color(255, 165, 0, 255);
+    gates.push_back(new Gate(output_texture, 1, new Vec2[1]{ Vec2(0, 45) }, Vec2(89, 45), BUFFER));
+    gates[gates.size() - 1]->sprite.setPosition(Vec2(floor((window.getSize().x/tile_width)-4)*tile_width, tile_width));
+    gates[gates.size() - 1]->sprite.setColor(gate_color);
+    Gate* output_gate = gates[gates.size() - 1];
+    labels.push_back(makeText("Y", font, Vec2(floor((window.getSize().x/tile_width)-4)*tile_width + 1.5*tile_width, tile_width + 1.5*tile_width), gate_color, 16));
+
+    // Container to track input gates
+    std::vector<Gate*> input_gates;
+
+    int total_inputs = 2;
+
+    for (int i = 0; i < total_inputs; i++) {
+
+        gates.push_back(const_factory());
+        gates[gates.size() - 1]->sprite.setPosition(Vec2(tile_width, tile_width + 4*i*tile_width));
+        gates[gates.size() - 1]->sprite.setColor(gate_color);
+        input_gates.push_back(gates[gates.size() - 1]);
+        labels.push_back(makeText("X" + asString(i + 1), font, Vec2(tile_width + 1.5*tile_width, tile_width + 4*i*tile_width + 1.5*tile_width), gate_color, 16));
+    }
 
     // Initialize loop timer
     sf::Clock timer;
@@ -160,6 +197,9 @@ int main() {
         // Right click on gate output to begin creating a wire
         if (input.rmb_released && !wiring_gate) {
             for (auto each : gates) {
+
+                if (each == output_gate)    continue;
+
                 sf::Vector2f output_position = each->sprite.getPosition() + each->output_position;
                 if (floor(input.scene_mouse.x/tile_width) == floor(output_position.x/tile_width) &&
                     floor(input.scene_mouse.y/tile_width) == floor(output_position.y/tile_width))
@@ -197,6 +237,9 @@ int main() {
 
         for (auto each : gates) {
             window.draw(each->sprite);
+        }
+        for (auto each: labels) {
+            window.draw(each);
         }
         for (auto each: wires) {
                 window.draw(each);
