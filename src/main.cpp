@@ -48,6 +48,10 @@ int main() {
     // Declare gate tracking vector
     std::vector<Gate*> gates;
 
+    // Container for holding visual representations of wires
+    std::vector<sf::RectangleShape> wires;
+    std::vector<sf::CircleShape>    joints;
+
     // Instantiate our input struct to hold the inputs for each tick
     Input input;
 
@@ -57,6 +61,9 @@ int main() {
     sf::RectangleShape cursor(Vec2(tile_width, tile_width));
     cursor.setOutlineThickness(0);
     cursor.setFillColor(sf::Color(0, 255, 0, 155));
+
+    std::vector<sf::RectangleShape> wire_previews;
+    std::vector<sf::CircleShape>    joint_previews;
 
     // Buffer to allow two gates to be selected for wiring
     Gate* wiring_gate = nullptr;
@@ -99,17 +106,36 @@ int main() {
         // Update cursor position and snap to grid
         cursor.setPosition(floor(input.scene_mouse.x/tile_width)*tile_width, floor(input.scene_mouse.y/tile_width)*tile_width);
 
+        // Generate a right-angled wire visual to trace the connection the user is hovering over
+        if (wiring_gate) {
+            wire_previews.clear();
+            joint_previews.clear();
+            Vec2 a = wiring_gate->sprite.getPosition() + wiring_gate->output_position;
+            Vec2 b = cursor.getPosition() + Vec2(0.0f, tile_width/2.0f);
+            if (a.y == b.y) {
+                wire_previews.push_back(makeLine(a, b, sf::Color(0, 0, 255, 155)));
+            }
+            else {
+                wire_previews.push_back(makeLine(a, Vec2((a.x + b.x)/2.0f, a.y), sf::Color(0, 0, 255, 155)));
+                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, a.y), Vec2((a.x + b.x)/2.0f, b.y), sf::Color(0, 0, 255, 155)));
+                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, b.y), b, sf::Color(0, 0, 255, 155)));
+                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, a.y), 5.0f, sf::Color(0, 0, 255, 155)));
+                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, b.y), 5.0f, sf::Color(0, 0, 255, 155)));
+            }
+        }
+
         // Create new gate at cursor position if user clicks
         if (input.lmb_released && !wiring_gate) {
             gates.push_back((*factory)());
             gates[gates.size() - 1]->sprite.setPosition(cursor.getPosition());
         }
 
+        // Right click on gate output to begin creating a wire
         if (input.rmb_released && !wiring_gate) {
             for (auto each : gates) {
                 sf::Vector2f output_position = each->sprite.getPosition() + each->output_position;
                 if (floor(input.scene_mouse.x/tile_width) == floor(output_position.x/tile_width) &&
-                    floor(input.scene_mouse.y/tile_width) == floor(output_position.y/tile_width)) 
+                    floor(input.scene_mouse.y/tile_width) == floor(output_position.y/tile_width))
                 {
                     wiring_gate = each;
                     cursor.setFillColor(sf::Color(255, 0, 0, 155));
@@ -117,13 +143,16 @@ int main() {
             }
         }
         else if (input.rmb_released && wiring_gate) {
+            // Right click on gate input to place a wire and store the visual generated above
             for (auto each : gates) {
                 for (int i = 0; i < each->input_count; i++) {
                     sf::Vector2f input_position = each->sprite.getPosition() + *(each->input_position + i);
                     if (floor(input.scene_mouse.x/tile_width) == floor(input_position.x/tile_width) &&
-                        floor(input.scene_mouse.y/tile_width) == floor(input_position.y/tile_width)) 
+                        floor(input.scene_mouse.y/tile_width) == floor(input_position.y/tile_width))
                     {
                         *(each->input + i) = wiring_gate;
+                        wires.insert(wires.end(), wire_previews.begin(), wire_previews.end());
+                        joints.insert(joints.end(), joint_previews.begin(), joint_previews.end());
                         wiring_gate = nullptr;
                         cursor.setFillColor(sf::Color(0, 255, 0, 155));
                     }
@@ -139,6 +168,20 @@ int main() {
 
         for (auto each : gates) {
             window.draw(each->sprite);
+        }
+        for (auto each: wires) {
+                window.draw(each);
+            }
+            for (auto each: joints) {
+                window.draw(each);
+            }
+        if (wiring_gate) {
+            for (auto each: wire_previews) {
+                window.draw(each);
+            }
+            for (auto each: joint_previews) {
+                window.draw(each);
+            }
         }
         window.draw(cursor);
 
