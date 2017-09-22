@@ -95,6 +95,28 @@ int main() {
             window.close();
         }
 
+        // User can use arrow keys or AWSD or translate view of scene
+        if (input.keyPressed(sf::Keyboard::A) || input.keyPressed(sf::Keyboard::Left)) {
+            scene_view.move(-tile_width*3, 0.0f);
+        }
+        if (input.keyPressed(sf::Keyboard::D) || input.keyPressed(sf::Keyboard::Right)) {
+            scene_view.move(tile_width*3, 0.0f);
+        }
+        if (input.keyPressed(sf::Keyboard::W) || input.keyPressed(sf::Keyboard::Up)) {
+            scene_view.move(0.0f, -tile_width*3);
+        }
+        if (input.keyPressed(sf::Keyboard::S) || input.keyPressed(sf::Keyboard::Down)) {
+            scene_view.move(0.0f, tile_width*3);
+        }
+
+        // User can zoom using mouse wheel
+        if (input.mmb_delta > 0) {
+            scene_view.zoom(0.5f);
+        }
+        else if (input.mmb_delta < 0) {
+            scene_view.zoom(2.0f);
+        }
+
         // If the user hits tab, switch the kind of logic gate that is being generated
         if (input.keyReleased(sf::Keyboard::Tab)) {
             factory++;
@@ -170,6 +192,8 @@ int main() {
         //////////////////////////////////////////
 
         window.clear();
+
+        window.setView(scene_view);
 
         for (auto each : gates) {
             window.draw(each->sprite);
