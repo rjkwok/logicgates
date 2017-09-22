@@ -56,6 +56,44 @@ sf::Text makeText(const std::string& str, sf::Font& font, const sf::Vector2f& ce
     return text;
 }
 
+void populateTruthTable(const int total_inputs, std::vector<std::vector<bool> >& truth_table, std::vector<bool> base, int i) {
+
+    std::vector<bool> f = base;
+    std::vector<bool> t = base;
+    f[i] = false;
+    t[i] = true;
+    if (i == total_inputs-1) {
+        truth_table.push_back(f);
+        truth_table.push_back(t);
+    }
+    else {
+        populateTruthTable(total_inputs, truth_table, f, i + 1);
+        populateTruthTable(total_inputs, truth_table, t, i + 1);
+    }
+}
+
+std::string truthTableAsString(std::vector<std::vector<bool> >& truth_table, const int total_inputs) {
+
+    std::stringstream sstream;
+    sstream << "|";
+    for (int j = 0; j < total_inputs; j++) {
+        sstream << " X" << (j + 1) << " |";
+    }
+    sstream << " Y' | Y  |";
+
+    sstream << "\n";
+
+    for (int i = 0; i < truth_table.size(); i++) {
+        sstream << "|";
+        for (int j = 0; j < truth_table[i].size(); j++) {
+            sstream << " " << truth_table[i][j] << "  |";
+        }
+
+        sstream << "\n";
+    }
+    return sstream.str();
+}
+
 struct Input {
 
     Input() = default;
