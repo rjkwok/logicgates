@@ -129,6 +129,11 @@ int main() {
             gates.push_back((*factory)());
             gates[gates.size() - 1]->sprite.setPosition(cursor.getPosition());
         }
+        else if (input.lmb_released) {
+            // Left click to abort a wire creation
+            wiring_gate = nullptr;
+            cursor.setFillColor(sf::Color(0, 255, 0, 155));
+        }
 
         // Right click on gate output to begin creating a wire
         if (input.rmb_released && !wiring_gate) {
