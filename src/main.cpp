@@ -4,10 +4,14 @@
 
 // srand, rand
 #include <stdlib.h>
+// floor
+#include <math.h>
 
 #include "util.h"
 
-int main() {
+typedef sf::Vector2f Vec2;
+
+int main() {    
 
     srand(time(NULL));
 
@@ -23,9 +27,17 @@ int main() {
     // Instantiate our input struct to hold the inputs for each tick
     Input input;
 
+    // Declare grid resolution and grid cursor
+    const float tile_width = 30.0f;
+
+    sf::RectangleShape cursor(Vec2(tile_width, tile_width));
+    cursor.setOutlineThickness(0);
+    cursor.setFillColor(sf::Color(0, 255, 0, 155));
+
     // Initialize loop timer
     sf::Clock timer;
     double dt = 0;
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Main game loop
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,11 +61,16 @@ int main() {
             window.close();
         }
 
+        cursor.setPosition(floor(input.scene_mouse.x/tile_width)*tile_width, floor(input.scene_mouse.y/tile_width)*tile_width);
+
         //////////////////////////////////////////
         // Draw
         //////////////////////////////////////////
 
         window.clear();
+
+        window.draw(cursor);
+
         window.display();
     }
 
