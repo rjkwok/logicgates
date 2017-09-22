@@ -160,10 +160,10 @@ int main() {
 
         // User can zoom using mouse wheel
         if (input.mmb_delta > 0) {
-            scene_view.zoom(0.5f);
+            scene_view.zoom(0.9f);
         }
         else if (input.mmb_delta < 0) {
-            scene_view.zoom(2.0f);
+            scene_view.zoom(1.1f);
         }
 
         // If the user hits tab, switch the kind of logic gate that is being generated
@@ -179,6 +179,8 @@ int main() {
 
         // Generate a right-angled wire visual to trace the connection the user is hovering over
         if (wiring_gate) {
+
+            const sf::Color wire_color = sf::Color(0, 90, 255, 155);
             wire_previews.clear();
             joint_previews.clear();
             Vec2 a = wiring_gate->sprite.getPosition() + wiring_gate->output_position;
@@ -187,11 +189,11 @@ int main() {
                 wire_previews.push_back(makeLine(a, b, sf::Color(0, 0, 255, 155)));
             }
             else {
-                wire_previews.push_back(makeLine(a, Vec2((a.x + b.x)/2.0f, a.y), sf::Color(0, 0, 255, 155)));
-                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, a.y), Vec2((a.x + b.x)/2.0f, b.y), sf::Color(0, 0, 255, 155)));
-                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, b.y), b, sf::Color(0, 0, 255, 155)));
-                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, a.y), 5.0f, sf::Color(0, 0, 255, 155)));
-                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, b.y), 5.0f, sf::Color(0, 0, 255, 155)));
+                wire_previews.push_back(makeLine(a, Vec2((a.x + b.x)/2.0f, a.y), wire_color));
+                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, a.y), Vec2((a.x + b.x)/2.0f, b.y), wire_color));
+                wire_previews.push_back(makeLine(Vec2((a.x + b.x)/2.0f, b.y), b, wire_color));
+                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, a.y), 5.0f, wire_color));
+                joint_previews.push_back(makeCircle(Vec2((a.x + b.x)/2.0f, b.y), 5.0f, wire_color));
             }
         }
 
@@ -199,6 +201,7 @@ int main() {
         if (input.lmb_released && !wiring_gate) {
             gates.push_back((*factory)());
             gates[gates.size() - 1]->sprite.setPosition(cursor.getPosition());
+            gates[gates.size() - 1]->sprite.setColor(gate_color);
         }
         else if (input.lmb_released) {
             // Left click to abort a wire creation
