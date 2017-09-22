@@ -227,7 +227,13 @@ int main() {
         else if (input.rmb_released && wiring_gate) {
             // Right click on gate input to place a wire and store the visual generated above
             for (auto each : gates) {
+
+                if (each == wiring_gate)    continue;
+
                 for (int i = 0; i < each->input_count; i++) {
+
+                    if (*(each->input + i)) continue;
+
                     sf::Vector2f input_position = each->sprite.getPosition() + *(each->input_position + i);
                     if (floor(input.scene_mouse.x/tile_width) == floor(input_position.x/tile_width) &&
                         floor(input.scene_mouse.y/tile_width) == floor(input_position.y/tile_width))
